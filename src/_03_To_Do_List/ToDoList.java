@@ -2,12 +2,16 @@ package _03_To_Do_List;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -42,9 +46,17 @@ public class ToDoList implements ActionListener {
 	private JButton saveList;
 	private JButton removeTask;
 	private JButton loadList;
+	private BufferedReader reader;
+	private FileWriter writer;
+	private String fileName;
 
 	public ToDoList(int width, int height) {
-		tasks = new ArrayList<String>();
+		JFileChooser jfc = new JFileChooser();
+		int val = jfc.showOpenDialog(null);
+		if(val == JFileChooser.APPROVE_OPTION) {
+			fileName = jfc.getSelectedFile().getAbsolutePath();
+		}
+		tasks = loadList();
 		JFrame frame = new JFrame("fortnite");
 		JPanel panel = new JPanel();
 		addTask = new JButton("Add Task");
@@ -73,23 +85,80 @@ public class ToDoList implements ActionListener {
 	public static void main(String[] args) {
 		new ToDoList(700, 700);
 	}
-
+	
+	public List<String> loadList(){
+	
+		try {
+			 reader = new BufferedReader(new FileReader(fileName));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		List<String> newList = new ArrayList<>();
+		try {
+			String line = reader.readLine();
+			while(line != null) {
+				newList.add(line);
+				System.out.println(line);
+				line = reader.readLine();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return newList;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("r30rw4j");
 		JButton clicked = (JButton) e.getSource();
 		if(clicked == addTask) {
 			tasks.add(JOptionPane.showInputDialog("What's your task?"));
-		}else if(clicked == viewTasks) {
+		} else if(clicked == viewTasks) {
 			String taskList = "";
 			for (int i = 0; i < tasks.size(); i++) {
 				taskList += tasks.get(i) + "\n";
 			}
 			JOptionPane.showMessageDialog(null, "Your tasks are:\n" + taskList);
+		} else if(clicked == removeTask) {
+			tasks.remove(JOptionPane.showInputDialog(null, "What task would you like to remove?"));
+		} else if(clicked == saveList) {
+			for (int i = 0; i < tasks.size(); i++) {
+				try {
+					System.out.println(tasks.get(i));
+					try {
+						writer = new FileWriter(fileName, false);
+					} catch (IOException e2) {
+						e2.printStackTrace();
+					}
+					writer.write(tasks.get(i) + "\n");
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(null, "Failed to save list!");
+				}
+			}
+			try {
+				writer.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} else if(clicked == loadList) {
+			JFileChooser jfc = new JFileChooser();
+			int val = jfc.showOpenDialog(null);
+			if(val == JFileChooser.APPROVE_OPTION) {
+				fileName = jfc.getSelectedFile().getAbsolutePath();
+			}
+			try {
+				writer = new FileWriter(fileName, false);
+				writer.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+			tasks = loadList();
 		}
 	}
-
-	
 
 }
