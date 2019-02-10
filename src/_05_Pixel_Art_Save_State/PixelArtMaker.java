@@ -1,6 +1,7 @@
 package _05_Pixel_Art_Save_State;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +27,7 @@ public class PixelArtMaker implements MouseListener, ActionListener {
 
 	public void start() {
 		save = new JButton("fortnite");
-		load =  new JButton("save");
+		load = new JButton("save");
 		gip = new GridInputPanel(this);
 		window = new JFrame("Pixel Art");
 		window.setLayout(new FlowLayout());
@@ -34,12 +35,12 @@ public class PixelArtMaker implements MouseListener, ActionListener {
 
 		save.addActionListener(this);
 		load.addActionListener(this);
-		
+
 		window.add(gip);
 		window.pack();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
-		
+
 	}
 
 	public void submitGridData(int w, int h, int r, int c) {
@@ -105,7 +106,7 @@ public class PixelArtMaker implements MouseListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JButton pressed = (JButton) e.getSource();
-		if(pressed == save) {
+		if (pressed == save) {
 			try {
 				FileWriter writer = new FileWriter("src/_05_Pixel_Art_Save_State/saveState.txt", false);
 				Pixel[][] array = gp.getPixelArray();
@@ -114,26 +115,34 @@ public class PixelArtMaker implements MouseListener, ActionListener {
 				writer.write(gip.getCollumns() + "\n");
 				writer.write(gp.getPixelWidth() + "\n");
 				writer.write(gp.getPixelHeight() + "\n");
+				writer.write(gp.getWindowWidth() + "\n");
+				writer.write(gp.getWindowHeight() + "\n");
 				for (int i = 0; i < array.length; i++) {
 					for (int j = 0; j < array.length; j++) {
-						writer.write(array[i][j].color.getRed() + "/"+ array[i][j].color.getGreen() + "/"+ array[i][j].color.getBlue() + "\n");
+						writer.write(array[i][j].color.getRed() + "/" + array[i][j].color.getGreen() + "/"
+								+ array[i][j].color.getBlue() + "\n");
 					}
 				}
 				writer.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		}else if(pressed == load) {
+		} else if (pressed == load) {
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader("src/_05_Pixel_Art_Save_State/saveState.txt"));
+				BufferedReader reader = new BufferedReader(
+						new FileReader("src/_05_Pixel_Art_Save_State/saveState.txt"));
 				System.out.println("Test");
 				try {
-					Pixel[][] array = new Pixel[Integer.parseInt(reader.readLine())][Integer.parseInt(reader.readLine())];
+					Pixel[][] array = new Pixel[Integer.parseInt(reader.readLine())][Integer
+							.parseInt(reader.readLine())];
 					gp.setPixelScale(Integer.parseInt(reader.readLine()), Integer.parseInt(reader.readLine()));
+					int width = Integer.parseInt(reader.readLine());
+					int height = Integer.parseInt(reader.readLine());
 					for (int i = 0; i < array.length; i++) {
 						for (int j = 0; j < array.length; j++) {
 							String[] colorData = reader.readLine().split("/");
-							Color color = new Color(Integer.parseInt(colorData[0]),Integer.parseInt(colorData[1]),Integer.parseInt(colorData[2]));
+							Color color = new Color(Integer.parseInt(colorData[0]), Integer.parseInt(colorData[1]),
+									Integer.parseInt(colorData[2]));
 							Pixel pixel = new Pixel(i, j);
 							pixel.color = color;
 							array[i][j] = pixel;
@@ -141,6 +150,7 @@ public class PixelArtMaker implements MouseListener, ActionListener {
 					}
 					gp.setPixelArray(array);
 					gp.update();
+					gp.setPreferredSize(new Dimension(width, height));
 					window.pack();
 					reader.close();
 				} catch (NumberFormatException e1) {
